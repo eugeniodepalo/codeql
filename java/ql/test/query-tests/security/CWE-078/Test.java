@@ -140,6 +140,96 @@ class Test {
     }
     conditionalArray[3] = arg;
     new ProcessBuilder(conditionalArray).start(); // $ Alert[java/command-line-injection]
+
+    String[] aliasedLiteral = new String[]{"/usr/bin/env", "/bin/cp", "-c", arg};
+    String[] literalAlias = aliasedLiteral;
+    literalAlias[1] = "/bin/sh";
+    new ProcessBuilder(aliasedLiteral).start(); // $ Alert[java/command-line-injection]
+
+    String[] aliasedArray = new String[]{"/usr/bin/env", "/bin/cp", "-c", "<command>"};
+    String[] arrayAlias = aliasedArray;
+    arrayAlias[1] = "/bin/sh";
+    aliasedArray[3] = arg;
+    new ProcessBuilder(aliasedArray).start(); // $ Alert[java/command-line-injection]
+
+    String[] allocatedArray = new String[4];
+    allocatedArray[0] = "/usr/bin/env";
+    allocatedArray[1] = "/bin/cp";
+    allocatedArray[2] = "-c";
+    allocatedArray[3] = arg;
+    String[] allocatedAlias = allocatedArray;
+    allocatedAlias[1] = "/bin/sh";
+    new ProcessBuilder(allocatedArray).start(); // $ Alert[java/command-line-injection]
+
+    String[] escapedArray = new String[]{"/usr/bin/env", "/bin/cp", "-c", arg};
+    mutateCommand(escapedArray);
+    new ProcessBuilder(escapedArray).start(); // $ Alert[java/command-line-injection]
+
+    String[] capturedArray = new String[]{"/usr/bin/env", "/bin/cp", "-c", arg};
+    Runnable mutation = () -> capturedArray[1] = "/bin/sh";
+    mutation.run();
+    new ProcessBuilder(capturedArray).start(); // $ Alert[java/command-line-injection]
+
+    List<String> aliasedList = new ArrayList<String>();
+    aliasedList.add("/usr/bin/env");
+    aliasedList.add("/bin/cp");
+    aliasedList.add("-c");
+    aliasedList.add(arg);
+    List<String> listAlias = aliasedList;
+    listAlias.set(1, "/bin/sh");
+    new ProcessBuilder(aliasedList).start(); // $ Alert[java/command-line-injection]
+
+    String[] castArray = new String[]{"/usr/bin/env", "/bin/cp", "-c", "<command>"};
+    ((String[]) castArray)[1] = "/bin/sh";
+    castArray[3] = arg + "";
+    new ProcessBuilder(castArray).start(); // $ Alert[java/command-line-injection]
+
+    String[] castOriginal = new String[]{"/usr/bin/env", "/bin/cp", "-c", "<command>"};
+    String[] castAlias = castOriginal;
+    ((String[]) castOriginal)[1] = "/bin/sh";
+    castAlias[3] = arg + "";
+    new ProcessBuilder(castAlias).start(); // $ Alert[java/command-line-injection]
+
+    String[] conditionalTarget = new String[]{"/usr/bin/env", "/bin/cp", "-c", "<command>"};
+    String[] otherTarget = new String[]{"/bin/echo", "<arg>"};
+    (arg.length() > 0 ? conditionalTarget : otherTarget)[1] = "/bin/sh";
+    conditionalTarget[3] = arg + "";
+    new ProcessBuilder(conditionalTarget).start(); // $ Alert[java/command-line-injection]
+
+    String[] storedArray = new String[]{"/usr/bin/env", "/bin/cp", "-c", "<command>"};
+    String[][] storage = new String[][]{storedArray};
+    storage[0][1] = "/bin/sh";
+    storedArray[3] = arg + "";
+    new ProcessBuilder(storedArray).start(); // $ Alert[java/command-line-injection]
+  }
+
+  public static void mutateCommand(String[] command) {
+    command[1] = "/bin/sh";
+  }
+
+  public static void partiallyKnownCommand(String arg, String configuredCommand) throws java.io.IOException {
+    String command = "/bin/cp";
+    if (arg.length() > 0) {
+      command = configuredCommand;
+    }
+    new ProcessBuilder(new String[]{"/usr/bin/env", command, "-c", arg}).start(); // $ Alert[java/command-line-injection]
+  }
+
+  public static void capturedLauncherCommands(String arg) {
+    final String launcher = "/usr/bin/env";
+    final String command = "/bin/cp";
+    Runnable good = () -> new ProcessBuilder(new String[]{launcher, command, arg + "", "/tmp/destination"}); // GOOD
+    good.run();
+
+    Runnable nested = () -> {
+      Runnable inner = () -> new ProcessBuilder(new String[]{launcher, command, arg + "", "/tmp/destination"}); // GOOD
+      inner.run();
+    };
+    nested.run();
+
+    final String shell = "/bin/sh";
+    Runnable bad = () -> new ProcessBuilder(new String[]{launcher, shell, "-c", arg}); // $ Alert[java/command-line-injection]
+    bad.run();
   }
 
   public static void fixedLauncherCommand(String arg) throws java.io.IOException {
@@ -170,6 +260,13 @@ class Test {
     new ProcessBuilder(assignedArray).start(); // GOOD
   }
 
+  public static void fixedAliasedLauncherArray(String arg) throws java.io.IOException {
+    String[] original = new String[]{"/usr/bin/env", "/bin/cp", "<arg>", "/tmp/destination"};
+    String[] alias = original;
+    alias[2] = arg;
+    new ProcessBuilder(alias).start(); // GOOD
+  }
+
   public static void relativeCommand() throws java.io.IOException {
       ProcessBuilder pb = new ProcessBuilder("ls"); // $ Alert[java/relative-path-command]
       pb.start();
@@ -185,10 +282,13 @@ class Test {
       nonShellCommand(arg);
       delegatingLaunchers(arg);
       launcherArguments(arg);
+      partiallyKnownCommand(arg, "/bin/sh");
+      capturedLauncherCommands(arg);
       fixedLauncherCommand(arg);
       fixedLauncherList(arg);
       fixedLauncherArray(arg);
       assignedLauncherArray(arg);
+      fixedAliasedLauncherArray(arg);
       relativeCommand();
   }
 }

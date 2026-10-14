@@ -21,16 +21,8 @@ predicate isSafeCommandArgument(Expr ex) {
       not isDelegatingLauncher(ai.getInit(0))
       or
       TLiteralArguments(ai).(CommandArguments).hasSafeArgument(i) and
-      not exists(SsaExplicitWrite array, ArrayAccess access |
-        arrayInitializerOf(array.getDefiningExpr()) = ai and
-        access.getArray() = array.getARead() and
-        arrayVarWrite(access) and
-        (
-          not access.getIndexExpr() instanceof CompileTimeConstantExpr
-          or
-          access.getIndexExpr().(CompileTimeConstantExpr).getIntValue() < i
-        )
-      )
+      not writesCommandPrefix(_, ai, i) and
+      not arrayEscapes(ai)
     )
   )
   or
@@ -55,7 +47,12 @@ predicate isSafeCommandArgument(Expr ex) {
       (
         not isDelegatingLauncher(caa.getFirstElement())
         or
-        TMutableArguments(caa).(CommandArguments).hasSafeArgument(i)
+        TMutableArguments(caa).(CommandArguments).hasSafeArgument(i) and
+        not arrayEscapes(containerOrigin(caa.getDefiningExpr())) and
+        not exists(ArrayAccess access |
+          writesCommandPrefix(access, containerOrigin(caa.getDefiningExpr()), i) and
+          not access.getArray() = caa.getARead()
+        )
       )
     )
   )
@@ -65,22 +62,7 @@ predicate isSafeCommandArgument(Expr ex) {
  * Holds if the given expression is the name of a shell command such as bash or python
  */
 private predicate isShell(Expr ex) {
-  exists(string cmd | cmd = ex.(StringLiteral).getValue() |
-    cmd.regexpMatch(".*(sh|javac?|python[23]?|osascript|cmd)(\\.exe)?$")
-  )
-  or
-  exists(SsaDefinition ssa, SsaExplicitWrite def |
-    ex = ssa.getARead() and
-    isShell(def.getDefiningExpr())
-  |
-    ssa.getAnUltimateDefinition() = def
-    or
-    ssa.(SsaCapturedDefinition).getAnUltimateCapturedDefinition() = def
-  )
-  or
-  isShell(ex.(Assignment).getRhs())
-  or
-  isShell(ex.(LocalVariableDeclExpr).getInit())
+  commandName(ex).regexpMatch(".*(sh|javac?|python[23]?|osascript|cmd)(\\.exe)?$")
 }
 
 /**
@@ -95,18 +77,43 @@ private predicate isDelegatingLauncher(Expr ex) {
 private string commandName(Expr ex) {
   result = ex.(StringLiteral).getValue()
   or
-  exists(SsaDefinition ssa, SsaExplicitWrite def |
+  exists(SsaDefinition ssa |
     ex = ssa.getARead() and
-    result = commandName(def.getDefiningExpr())
-  |
-    ssa.getAnUltimateDefinition() = def
-    or
-    ssa.(SsaCapturedDefinition).getAnUltimateCapturedDefinition() = def
+    result = commandName(ultimateDefinition(ssa).(SsaExplicitWrite).getDefiningExpr())
   )
   or
   result = commandName(ex.(Assignment).getRhs())
   or
   result = commandName(ex.(LocalVariableDeclExpr).getInit())
+}
+
+private SsaDefinition ultimateDefinition(SsaDefinition ssa) {
+  result = ssa.getAnUltimateDefinition() and
+  not result instanceof SsaCapturedDefinition
+  or
+  result =
+    ultimateDefinition(ssa.getAnUltimateDefinition()
+          .(SsaCapturedDefinition)
+          .getAnUltimateCapturedDefinition())
+}
+
+/** Gets a command name only when every reaching definition resolves to the same constant. */
+private string fixedCommandName(Expr ex) {
+  result = ex.(StringLiteral).getValue()
+  or
+  exists(SsaDefinition ssa |
+    ex = ssa.getARead() and
+    result =
+      fixedCommandName(any(SsaExplicitWrite def | def = ultimateDefinition(ssa)).getDefiningExpr())
+  |
+    forall(SsaDefinition def | def = ultimateDefinition(ssa) |
+      fixedCommandName(def.(SsaExplicitWrite).getDefiningExpr()) = result
+    )
+  )
+  or
+  result = fixedCommandName(ex.(Assignment).getRhs())
+  or
+  result = fixedCommandName(ex.(LocalVariableDeclExpr).getInit())
 }
 
 private newtype TCommandArguments =
@@ -123,6 +130,7 @@ private class CommandArguments extends TCommandArguments {
     or
     exists(CommandArgumentList list |
       this = TListArguments(list) and
+      not listEscapes(list) and
       forall(MethodCall add | add = list.getAnAdd() |
         add.getMethod().hasName("add") and add.getNumArgument() = 1
       ) and
@@ -146,11 +154,8 @@ private class CommandArguments extends TCommandArguments {
 
   /** Gets a constant shared by every possible value at this position. */
   private string getFixedArgument(int index) {
-    result = commandName(this.getArgument(index)) and
-    forall(Expr value | value = this.getArgument(index) |
-      commandName(value) = result and
-      not exists(string other | commandName(value) = other and other != result)
-    )
+    result = fixedCommandName(this.getArgument(index)) and
+    forall(Expr value | value = this.getArgument(index) | fixedCommandName(value) = result)
   }
 
   /**
@@ -225,14 +230,82 @@ private class CommandArguments extends TCommandArguments {
   predicate hasSafeArgument(int index) { this.safeAfter(0, index) }
 }
 
-private ArrayInit arrayInitializerOf(Expr ex) {
+private ArrayInit arrayInitializerOf(Expr ex) { result = containerOrigin(ex).(ArrayInit) }
+
+/** Gets a container's allocation or initializer, including through local aliases. */
+private Expr containerOrigin(Expr ex) {
   result = ex.(ArrayInit)
+  or
+  result = ex.(ClassInstanceExpr)
+  or
+  ex.getUnderlyingExpr() != ex and
+  result = containerOrigin(ex.getUnderlyingExpr())
+  or
+  result = containerOrigin(ex.(ConditionalExpr).getBranchExpr(_))
   or
   result = ex.(ArrayCreationExpr).getInit()
   or
-  result = arrayInitializerOf(ex.(LocalVariableDeclExpr).getInit())
+  ex instanceof ArrayCreationExpr and
+  not exists(ex.(ArrayCreationExpr).getInit()) and
+  result = ex
   or
-  result = arrayInitializerOf(ex.(Assignment).getRhs())
+  result = containerOrigin(ex.(LocalVariableDeclExpr).getInit())
+  or
+  result = containerOrigin(ex.(Assignment).getRhs())
+  or
+  exists(SsaDefinition ssa |
+    ex = ssa.getARead() and
+    result = containerOrigin(ultimateDefinition(ssa).(SsaExplicitWrite).getDefiningExpr())
+  )
+}
+
+/** Holds if the array may be mutated through a use not covered by the local alias analysis. */
+private predicate arrayEscapes(Expr origin) {
+  containerIsPassedOut(origin)
+  or
+  containerOrigin(any(MethodCall call).getQualifier()) = origin
+}
+
+private predicate listEscapes(CommandArgumentList list) {
+  containerIsPassedOut(containerOrigin(list.getDefiningExpr()))
+  or
+  exists(MethodCall call |
+    containerOrigin(call.getQualifier()) = containerOrigin(list.getDefiningExpr()) and
+    not call = list.getAnAdd()
+  )
+}
+
+private predicate containerIsPassedOut(Expr origin) {
+  exists(Call call |
+    containerOrigin(call.getAnArgument()) = origin and
+    not (
+      call.getCallee().getDeclaringType().hasQualifiedName("java.lang", "ProcessBuilder") and
+      (call.getCallee() instanceof Constructor or call.getCallee().hasName("command"))
+      or
+      call.getCallee().getDeclaringType().hasQualifiedName("java.lang", "Runtime") and
+      call.getCallee().hasName("exec")
+    )
+  )
+  or
+  containerOrigin(any(ReturnStmt ret).getResult()) = origin
+  or
+  containerOrigin(any(ArrayInit init).getAnInit()) = origin
+  or
+  exists(Assignment assignment |
+    containerOrigin(assignment.getRhs()) = origin and
+    (assignment.getDest() instanceof FieldAccess or assignment.getDest() instanceof ArrayAccess)
+  )
+}
+
+bindingset[origin, index]
+private predicate writesCommandPrefix(ArrayAccess access, Expr origin, int index) {
+  containerOrigin(access.getArray()) = origin and
+  arrayVarWrite(access) and
+  (
+    not access.getIndexExpr() instanceof CompileTimeConstantExpr
+    or
+    access.getIndexExpr().(CompileTimeConstantExpr).getIntValue() < index
+  )
 }
 
 /** The width of an understood launcher option, including a separate option operand. */
