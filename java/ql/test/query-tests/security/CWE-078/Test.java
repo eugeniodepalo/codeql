@@ -44,6 +44,21 @@ class Test {
 
     pb = new ProcessBuilder(cmd1);
     pb.start();
+
+    pb = new ProcessBuilder(new String[]{"cp", arg, "/tmp/destination"}); // $ Alert[java/relative-path-command]
+    pb.start();
+  }
+
+  public static void delegatingLaunchers(String arg) throws java.io.IOException {
+    new ProcessBuilder(new String[]{"chroot", "/tmp/root", arg}).start(); // $ Alert[java/command-line-injection] Alert[java/relative-path-command]
+    new ProcessBuilder(new String[]{"env", arg}).start(); // $ Alert[java/command-line-injection] Alert[java/relative-path-command]
+    new ProcessBuilder(new String[]{"nice", arg}).start(); // $ Alert[java/command-line-injection] Alert[java/relative-path-command]
+    new ProcessBuilder(new String[]{"nohup", arg}).start(); // $ Alert[java/command-line-injection] Alert[java/relative-path-command]
+    new ProcessBuilder(new String[]{"setsid", arg}).start(); // $ Alert[java/command-line-injection] Alert[java/relative-path-command]
+    new ProcessBuilder(new String[]{"stdbuf", "-oL", arg}).start(); // $ Alert[java/command-line-injection] Alert[java/relative-path-command]
+    new ProcessBuilder(new String[]{"sudo", arg}).start(); // $ Alert[java/command-line-injection] Alert[java/relative-path-command]
+    new ProcessBuilder(new String[]{"timeout", "10", arg}).start(); // $ Alert[java/command-line-injection] Alert[java/relative-path-command]
+    new ProcessBuilder(new String[]{"xargs", arg}).start(); // $ Alert[java/command-line-injection] Alert[java/relative-path-command]
   }
 
   public static void relativeCommand() throws java.io.IOException {
@@ -59,6 +74,7 @@ class Test {
 
       shellCommand(arg);
       nonShellCommand(arg);
+      delegatingLaunchers(arg);
       relativeCommand();
   }
 }

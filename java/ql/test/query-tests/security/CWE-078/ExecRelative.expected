@@ -1,2 +1,12 @@
 | TaintedEnvironment.java:39:35:39:55 | new String[] | Command with a relative path 'ls' is executed. |
-| Test.java:50:46:50:49 | "ls" | Command with a relative path 'ls' is executed. |
+| Test.java:48:29:48:71 | new String[] | Command with a relative path 'cp' is executed. |
+| Test.java:53:24:53:63 | new String[] | Command with a relative path 'chroot' is executed. |
+| Test.java:54:24:54:47 | new String[] | Command with a relative path 'env' is executed. |
+| Test.java:55:24:55:48 | new String[] | Command with a relative path 'nice' is executed. |
+| Test.java:56:24:56:49 | new String[] | Command with a relative path 'nohup' is executed. |
+| Test.java:57:24:57:50 | new String[] | Command with a relative path 'setsid' is executed. |
+| Test.java:58:24:58:57 | new String[] | Command with a relative path 'stdbuf' is executed. |
+| Test.java:59:24:59:48 | new String[] | Command with a relative path 'sudo' is executed. |
+| Test.java:60:24:60:57 | new String[] | Command with a relative path 'timeout' is executed. |
+| Test.java:61:24:61:49 | new String[] | Command with a relative path 'xargs' is executed. |
+| Test.java:65:46:65:49 | "ls" | Command with a relative path 'ls' is executed. |

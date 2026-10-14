@@ -1,9 +1,18 @@
 #select
-| Test.java:7:44:7:69 | ... + ... | Test.java:57:27:57:39 | args : String[] | Test.java:7:25:7:70 | new ..[] { .. } | This command line depends on a $@. | Test.java:57:27:57:39 | args | user-provided value |
-| Test.java:10:29:10:74 | new String[] | Test.java:57:27:57:39 | args : String[] | Test.java:10:29:10:74 | new String[] | This command line depends on a $@. | Test.java:57:27:57:39 | args | user-provided value |
-| Test.java:18:29:18:31 | cmd | Test.java:57:27:57:39 | args : String[] | Test.java:18:29:18:31 | cmd | This command line depends on a $@. | Test.java:57:27:57:39 | args | user-provided value |
-| Test.java:24:29:24:32 | cmd1 | Test.java:57:27:57:39 | args : String[] | Test.java:24:29:24:32 | cmd1 | This command line depends on a $@. | Test.java:57:27:57:39 | args | user-provided value |
-| Test.java:29:44:29:64 | ... + ... | Test.java:57:27:57:39 | args : String[] | Test.java:29:25:29:65 | new ..[] { .. } | This command line depends on a $@. | Test.java:57:27:57:39 | args | user-provided value |
+| Test.java:7:44:7:69 | ... + ... | Test.java:72:27:72:39 | args : String[] | Test.java:7:25:7:70 | new ..[] { .. } | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
+| Test.java:10:29:10:74 | new String[] | Test.java:72:27:72:39 | args : String[] | Test.java:10:29:10:74 | new String[] | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
+| Test.java:18:29:18:31 | cmd | Test.java:72:27:72:39 | args : String[] | Test.java:18:29:18:31 | cmd | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
+| Test.java:24:29:24:32 | cmd1 | Test.java:72:27:72:39 | args : String[] | Test.java:24:29:24:32 | cmd1 | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
+| Test.java:29:44:29:64 | ... + ... | Test.java:72:27:72:39 | args : String[] | Test.java:29:25:29:65 | new ..[] { .. } | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
+| Test.java:53:24:53:63 | new String[] | Test.java:72:27:72:39 | args : String[] | Test.java:53:24:53:63 | new String[] | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
+| Test.java:54:24:54:47 | new String[] | Test.java:72:27:72:39 | args : String[] | Test.java:54:24:54:47 | new String[] | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
+| Test.java:55:24:55:48 | new String[] | Test.java:72:27:72:39 | args : String[] | Test.java:55:24:55:48 | new String[] | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
+| Test.java:56:24:56:49 | new String[] | Test.java:72:27:72:39 | args : String[] | Test.java:56:24:56:49 | new String[] | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
+| Test.java:57:24:57:50 | new String[] | Test.java:72:27:72:39 | args : String[] | Test.java:57:24:57:50 | new String[] | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
+| Test.java:58:24:58:57 | new String[] | Test.java:72:27:72:39 | args : String[] | Test.java:58:24:58:57 | new String[] | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
+| Test.java:59:24:59:48 | new String[] | Test.java:72:27:72:39 | args : String[] | Test.java:59:24:59:48 | new String[] | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
+| Test.java:60:24:60:57 | new String[] | Test.java:72:27:72:39 | args : String[] | Test.java:60:24:60:57 | new String[] | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
+| Test.java:61:24:61:49 | new String[] | Test.java:72:27:72:39 | args : String[] | Test.java:61:24:61:49 | new String[] | This command line depends on a $@. | Test.java:72:27:72:39 | args | user-provided value |
 edges
 | Test.java:6:35:6:44 | arg : String | Test.java:7:44:7:69 | ... + ... : String | provenance |  |
 | Test.java:6:35:6:44 | arg : String | Test.java:10:61:10:73 | ... + ... : String | provenance |  |
@@ -18,10 +27,39 @@ edges
 | Test.java:22:15:22:27 | ... + ... : String | Test.java:22:5:22:8 | cmd1 [post update] : String[] [[]] : String | provenance |  |
 | Test.java:28:38:28:47 | arg : String | Test.java:29:44:29:64 | ... + ... : String | provenance |  |
 | Test.java:29:44:29:64 | ... + ... : String | Test.java:29:25:29:65 | new ..[] { .. } | provenance | Sink:MaD:2 |
-| Test.java:57:27:57:39 | args : String[] | Test.java:60:20:60:22 | arg : String | provenance |  |
-| Test.java:57:27:57:39 | args : String[] | Test.java:61:23:61:25 | arg : String | provenance |  |
-| Test.java:60:20:60:22 | arg : String | Test.java:6:35:6:44 | arg : String | provenance |  |
-| Test.java:61:23:61:25 | arg : String | Test.java:28:38:28:47 | arg : String | provenance |  |
+| Test.java:52:42:52:51 | arg : String | Test.java:53:60:53:62 | arg : String | provenance |  |
+| Test.java:52:42:52:51 | arg : String | Test.java:54:44:54:46 | arg : String | provenance |  |
+| Test.java:52:42:52:51 | arg : String | Test.java:55:45:55:47 | arg : String | provenance |  |
+| Test.java:52:42:52:51 | arg : String | Test.java:56:46:56:48 | arg : String | provenance |  |
+| Test.java:52:42:52:51 | arg : String | Test.java:57:47:57:49 | arg : String | provenance |  |
+| Test.java:52:42:52:51 | arg : String | Test.java:58:54:58:56 | arg : String | provenance |  |
+| Test.java:52:42:52:51 | arg : String | Test.java:59:45:59:47 | arg : String | provenance |  |
+| Test.java:52:42:52:51 | arg : String | Test.java:60:54:60:56 | arg : String | provenance |  |
+| Test.java:52:42:52:51 | arg : String | Test.java:61:46:61:48 | arg : String | provenance |  |
+| Test.java:53:24:53:63 | {...} : String[] [[]] : String | Test.java:53:24:53:63 | new String[] | provenance | Sink:MaD:2 |
+| Test.java:53:60:53:62 | arg : String | Test.java:53:24:53:63 | {...} : String[] [[]] : String | provenance |  |
+| Test.java:54:24:54:47 | {...} : String[] [[]] : String | Test.java:54:24:54:47 | new String[] | provenance | Sink:MaD:2 |
+| Test.java:54:44:54:46 | arg : String | Test.java:54:24:54:47 | {...} : String[] [[]] : String | provenance |  |
+| Test.java:55:24:55:48 | {...} : String[] [[]] : String | Test.java:55:24:55:48 | new String[] | provenance | Sink:MaD:2 |
+| Test.java:55:45:55:47 | arg : String | Test.java:55:24:55:48 | {...} : String[] [[]] : String | provenance |  |
+| Test.java:56:24:56:49 | {...} : String[] [[]] : String | Test.java:56:24:56:49 | new String[] | provenance | Sink:MaD:2 |
+| Test.java:56:46:56:48 | arg : String | Test.java:56:24:56:49 | {...} : String[] [[]] : String | provenance |  |
+| Test.java:57:24:57:50 | {...} : String[] [[]] : String | Test.java:57:24:57:50 | new String[] | provenance | Sink:MaD:2 |
+| Test.java:57:47:57:49 | arg : String | Test.java:57:24:57:50 | {...} : String[] [[]] : String | provenance |  |
+| Test.java:58:24:58:57 | {...} : String[] [[]] : String | Test.java:58:24:58:57 | new String[] | provenance | Sink:MaD:2 |
+| Test.java:58:54:58:56 | arg : String | Test.java:58:24:58:57 | {...} : String[] [[]] : String | provenance |  |
+| Test.java:59:24:59:48 | {...} : String[] [[]] : String | Test.java:59:24:59:48 | new String[] | provenance | Sink:MaD:2 |
+| Test.java:59:45:59:47 | arg : String | Test.java:59:24:59:48 | {...} : String[] [[]] : String | provenance |  |
+| Test.java:60:24:60:57 | {...} : String[] [[]] : String | Test.java:60:24:60:57 | new String[] | provenance | Sink:MaD:2 |
+| Test.java:60:54:60:56 | arg : String | Test.java:60:24:60:57 | {...} : String[] [[]] : String | provenance |  |
+| Test.java:61:24:61:49 | {...} : String[] [[]] : String | Test.java:61:24:61:49 | new String[] | provenance | Sink:MaD:2 |
+| Test.java:61:46:61:48 | arg : String | Test.java:61:24:61:49 | {...} : String[] [[]] : String | provenance |  |
+| Test.java:72:27:72:39 | args : String[] | Test.java:75:20:75:22 | arg : String | provenance |  |
+| Test.java:72:27:72:39 | args : String[] | Test.java:76:23:76:25 | arg : String | provenance |  |
+| Test.java:72:27:72:39 | args : String[] | Test.java:77:27:77:29 | arg : String | provenance |  |
+| Test.java:75:20:75:22 | arg : String | Test.java:6:35:6:44 | arg : String | provenance |  |
+| Test.java:76:23:76:25 | arg : String | Test.java:28:38:28:47 | arg : String | provenance |  |
+| Test.java:77:27:77:29 | arg : String | Test.java:52:42:52:51 | arg : String | provenance |  |
 models
 | 1 | Sink: java.lang; ProcessBuilder; false; ProcessBuilder; (List); ; Argument[0]; command-injection; ai-manual |
 | 2 | Sink: java.lang; ProcessBuilder; false; ProcessBuilder; (String[]); ; Argument[0]; command-injection; ai-manual |
@@ -42,7 +80,36 @@ nodes
 | Test.java:28:38:28:47 | arg : String | semmle.label | arg : String |
 | Test.java:29:25:29:65 | new ..[] { .. } | semmle.label | new ..[] { .. } |
 | Test.java:29:44:29:64 | ... + ... : String | semmle.label | ... + ... : String |
-| Test.java:57:27:57:39 | args : String[] | semmle.label | args : String[] |
-| Test.java:60:20:60:22 | arg : String | semmle.label | arg : String |
-| Test.java:61:23:61:25 | arg : String | semmle.label | arg : String |
+| Test.java:52:42:52:51 | arg : String | semmle.label | arg : String |
+| Test.java:53:24:53:63 | new String[] | semmle.label | new String[] |
+| Test.java:53:24:53:63 | {...} : String[] [[]] : String | semmle.label | {...} : String[] [[]] : String |
+| Test.java:53:60:53:62 | arg : String | semmle.label | arg : String |
+| Test.java:54:24:54:47 | new String[] | semmle.label | new String[] |
+| Test.java:54:24:54:47 | {...} : String[] [[]] : String | semmle.label | {...} : String[] [[]] : String |
+| Test.java:54:44:54:46 | arg : String | semmle.label | arg : String |
+| Test.java:55:24:55:48 | new String[] | semmle.label | new String[] |
+| Test.java:55:24:55:48 | {...} : String[] [[]] : String | semmle.label | {...} : String[] [[]] : String |
+| Test.java:55:45:55:47 | arg : String | semmle.label | arg : String |
+| Test.java:56:24:56:49 | new String[] | semmle.label | new String[] |
+| Test.java:56:24:56:49 | {...} : String[] [[]] : String | semmle.label | {...} : String[] [[]] : String |
+| Test.java:56:46:56:48 | arg : String | semmle.label | arg : String |
+| Test.java:57:24:57:50 | new String[] | semmle.label | new String[] |
+| Test.java:57:24:57:50 | {...} : String[] [[]] : String | semmle.label | {...} : String[] [[]] : String |
+| Test.java:57:47:57:49 | arg : String | semmle.label | arg : String |
+| Test.java:58:24:58:57 | new String[] | semmle.label | new String[] |
+| Test.java:58:24:58:57 | {...} : String[] [[]] : String | semmle.label | {...} : String[] [[]] : String |
+| Test.java:58:54:58:56 | arg : String | semmle.label | arg : String |
+| Test.java:59:24:59:48 | new String[] | semmle.label | new String[] |
+| Test.java:59:24:59:48 | {...} : String[] [[]] : String | semmle.label | {...} : String[] [[]] : String |
+| Test.java:59:45:59:47 | arg : String | semmle.label | arg : String |
+| Test.java:60:24:60:57 | new String[] | semmle.label | new String[] |
+| Test.java:60:24:60:57 | {...} : String[] [[]] : String | semmle.label | {...} : String[] [[]] : String |
+| Test.java:60:54:60:56 | arg : String | semmle.label | arg : String |
+| Test.java:61:24:61:49 | new String[] | semmle.label | new String[] |
+| Test.java:61:24:61:49 | {...} : String[] [[]] : String | semmle.label | {...} : String[] [[]] : String |
+| Test.java:61:46:61:48 | arg : String | semmle.label | arg : String |
+| Test.java:72:27:72:39 | args : String[] | semmle.label | args : String[] |
+| Test.java:75:20:75:22 | arg : String | semmle.label | arg : String |
+| Test.java:76:23:76:25 | arg : String | semmle.label | arg : String |
+| Test.java:77:27:77:29 | arg : String | semmle.label | arg : String |
 subpaths

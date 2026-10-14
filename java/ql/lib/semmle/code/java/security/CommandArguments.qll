@@ -10,22 +10,25 @@ import semmle.code.java.Collections
 
 /**
  * Holds if `ex` is used safely as an argument to a command;
- * i.e. it's not in the first position and it's not a shell command.
+ * i.e. it's not in the first position and the command does not interpret arguments as commands.
  */
 predicate isSafeCommandArgument(Expr ex) {
   exists(ArrayInit ai, int i |
     ex = ai.getInit(i) and
     i > 0 and
-    not isShell(ai.getInit(0))
+    not isShell(ai.getInit(0)) and
+    not isDelegatingLauncher(ai.getInit(0))
   )
   or
   exists(CommandArgumentList cal |
     not cal.isShell() and
+    not isDelegatingLauncher(cal.getAFirstAdd().getArgument(0)) and
     ex = cal.getASubsequentAdd().getArgument(0)
   )
   or
   exists(CommandArgArrayImmutableFirst caa |
     not caa.isShell() and
+    not isDelegatingLauncher(caa.getFirstElement()) and
     ex = caa.getAWrite(any(int i | i > 0))
   )
 }
@@ -50,6 +53,29 @@ private predicate isShell(Expr ex) {
   isShell(ex.(Assignment).getRhs())
   or
   isShell(ex.(LocalVariableDeclExpr).getInit())
+}
+
+/**
+ * Holds if the given expression is the name of a launcher that delegates to a command supplied in
+ * one of its arguments, rather than interpreting that command itself like a shell.
+ */
+private predicate isDelegatingLauncher(Expr ex) {
+  exists(string cmd | cmd = ex.(StringLiteral).getValue() |
+    cmd.regexpMatch("(.*/)?(chroot|env|nice|nohup|setsid|stdbuf|sudo|timeout|xargs)$")
+  )
+  or
+  exists(SsaDefinition ssa, SsaExplicitWrite def |
+    ex = ssa.getARead() and
+    isDelegatingLauncher(def.getDefiningExpr())
+  |
+    ssa.getAnUltimateDefinition() = def
+    or
+    ssa.(SsaCapturedDefinition).getAnUltimateCapturedDefinition() = def
+  )
+  or
+  isDelegatingLauncher(ex.(Assignment).getRhs())
+  or
+  isDelegatingLauncher(ex.(LocalVariableDeclExpr).getInit())
 }
 
 /**
