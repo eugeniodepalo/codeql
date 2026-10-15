@@ -11597,8 +11597,8 @@ inferType
 | main.rs:2295:19:2295:26 | strings1 | TArray.TRef | {EXTERNAL LOCATION} | str |
 | main.rs:2295:28:2295:29 | { ... } |  | {EXTERNAL LOCATION} | () |
 | main.rs:2296:9:2296:33 | for ... in ... { ... } |  | {EXTERNAL LOCATION} | () |
-| main.rs:2296:13:2296:13 | s |  | {EXTERNAL LOCATION} | &mut |
 | main.rs:2296:13:2296:13 | s |  | {EXTERNAL LOCATION} | I::Item[Iterator] |
+| main.rs:2296:13:2296:13 | s |  | {EXTERNAL LOCATION} | &mut |
 | main.rs:2296:13:2296:13 | s | TRefMut | {EXTERNAL LOCATION} | & |
 | main.rs:2296:13:2296:13 | s | TRefMut.TRef | {EXTERNAL LOCATION} | str |
 | main.rs:2296:18:2296:30 | &mut strings1 |  | {EXTERNAL LOCATION} | &mut |
